@@ -1,0 +1,7 @@
+*.img
+*.iso
+*.qcow2
+tatame.xml
+.vscode
+old/
+data/

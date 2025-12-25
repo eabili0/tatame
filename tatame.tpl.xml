@@ -1,0 +1,30 @@
+<domain type='qemu'>
+  <name>tatame</name>
+  <memory unit='GiB'>8</memory>
+  <vcpu>8</vcpu>
+  <os>
+    <type arch='x86_64'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+  <devices>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='${ROOT_DISK}'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+      <disk device="disk" type="file" model="virtio-non-transitional">
+      <source file="${CLOUD_INIT_DISK}" />
+      <target bus="virtio" dev="vdb" />
+      <driver cache="none" error_policy="stop" name="qemu" type="raw" discard="unmap" />
+    </disk>
+    <interface type='user'>
+      <model type='virtio'/>
+      <portforward>
+        <proto>tcp</proto>
+        <host>2222</host>
+        <guest>22</guest>
+      </portforward>
+    </interface>
+    <graphics type='vnc' port='-1' autoport='yes' passwd='${VNC_PASSWORD}'/>
+  </devices>
+</domain>
