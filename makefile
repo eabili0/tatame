@@ -14,15 +14,13 @@ ${IMAGE}:
 	mkdir -p ${PWD}/data
 	curl -L ${CLOUD_IMG_URL} -o ${IMAGE} --progress-bar
 
-download-qcow: ${IMAGE}
-
 ${SSH_KEY}:
 	@ssh-keygen -t ed25519 -f ${SSH_KEY} -N "" || true
 
 ${NETPLAN_CONFIG}: 
 	cp ${PWD}/utils/netplan.yaml ${NETPLAN_CONFIG}
 
-disks: download-qcow ${SSH_KEY} ${NETPLAN_CONFIG}
+disks: ${IMAGE} ${SSH_KEY} ${NETPLAN_CONFIG}
 	scripts/disks.sh
 
 setup: disks
@@ -32,6 +30,12 @@ setup: disks
 
 start:
 	virsh -c qemu:///session start tatame
+
+console:
+	virsh -c qemu:///session console tatame
+	
+ssh:
+	ssh -i ${SSH_KEY} ubuntu@localhost -p 2222
 
 stop:
 	virsh -c qemu:///session destroy tatame
@@ -43,21 +47,13 @@ cleanup:
 	rm -f ${SSH_KEY} ${SSH_KEY}.pub
 	ssh-keygen -f ~/.ssh/known_hosts -R "[localhost]:2222"
 
-status:
-	virsh -c qemu:///session list --all | grep tatame || echo "VM 'tatame' not found."
-
-console:
-	virsh -c qemu:///session console tatame
-	
-ssh:
-	ssh -i ${SSH_KEY} ubuntu@localhost -p 2222
-
 help:
 	@echo "Available targets:"
-	@echo "  download-qcow   - Download the base qcow2 image if not present."
-	@echo "  disks           - Define root disk and cloud-init disk."
-	@echo "  vm-define       - Define the VM in libvirt using the template."
-	@echo "  setup           - Prepare the VM (download, expand, define)."
+	@echo "  disks           - Prepare root disk and cloud-init disk."
+	@echo "  setup           - Prepare the VM (prepare disks and define domain)."
 	@echo "  start           - Start the VM."
+	@echo "  console 	     - Connect to the VM console."
+	@echo "  ssh             - SSH into the VM."
 	@echo "  stop            - Stop the VM."
+	@echo "  cleanup         - Undefine the VM and remove created files."
 	@echo "  help            - Show this help message."
