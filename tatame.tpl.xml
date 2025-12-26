@@ -1,4 +1,4 @@
-<domain type='qemu'>
+<domain type='qemu' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
   <name>tatame</name>
   <memory unit='GiB'>8</memory>
   <vcpu>8</vcpu>
@@ -7,6 +7,13 @@
     <boot dev='hd'/>
   </os>
   <devices>
+    <memballoon model="none" />
+    <serial type="pty">
+      <target port="0" />
+    </serial>
+    <console type="pty">
+      <target type="serial" port="0" />
+    </console>
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2'/>
       <source file='${ROOT_DISK}'/>
@@ -15,16 +22,12 @@
       <disk device="disk" type="file" model="virtio-non-transitional">
       <source file="${CLOUD_INIT_DISK}" />
       <target bus="virtio" dev="vdb" />
-      <driver cache="none" error_policy="stop" name="qemu" type="raw" discard="unmap" />
     </disk>
-    <interface type='user'>
-      <model type='virtio'/>
-      <portforward>
-        <proto>tcp</proto>
-        <host>2222</host>
-        <guest>22</guest>
-      </portforward>
-    </interface>
-    <graphics type='vnc' port='-1' autoport='yes' passwd='${VNC_PASSWORD}'/>
   </devices>
+  <qemu:commandline>
+    <qemu:arg value='-netdev'/>
+    <qemu:arg value='user,id=net0,hostfwd=tcp::2222-:22'/>
+    <qemu:arg value='-device'/>
+    <qemu:arg value='virtio-net-pci,netdev=net0,bus=pci.0,addr=0x5'/>
+  </qemu:commandline>
 </domain>
