@@ -41,6 +41,7 @@ cleanup:
 	rm -f tatame.xml
 	rm -f ${ROOT_DISK} ${CLOUD_INIT_DISK}
 	rm -f ${SSH_KEY} ${SSH_KEY}.pub
+	ssh-keygen -f ~/.ssh/known_hosts -R "[localhost]:2222"
 
 status:
 	virsh -c qemu:///session list --all | grep tatame || echo "VM 'tatame' not found."
